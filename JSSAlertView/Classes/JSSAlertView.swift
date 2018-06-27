@@ -75,6 +75,7 @@ open class JSSAlertView: UIViewController {
     var cancelAction: (()->Void)!
     var isAlertOpen: Bool = false
     var noButtons: Bool = false
+    var buttonsBackgroundView: UIView!
     
     var timeLeft: UInt?
     
@@ -152,15 +153,15 @@ open class JSSAlertView: UIViewController {
         self.viewWidth = size.width
         self.viewHeight = size.height
         
-        var yPos: CGFloat = 0.0
+        var yPos: CGFloat = 24.0
         let contentWidth:CGFloat = self.alertWidth - (self.padding*2)
         
         // position the icon image view, if there is one
         if self.iconImageView != nil {
             yPos += iconImageView.frame.height
             let centerX = (self.alertWidth-self.iconImageView.frame.width)/2
-            self.iconImageView.frame.origin = CGPoint(x: centerX, y: self.padding)
-            yPos += padding
+            iconImageView.frame = CGRect(x: centerX, y: 24, width: 64, height: 64)
+            yPos += 16
         }
         
         // position the title
@@ -168,10 +169,8 @@ open class JSSAlertView: UIViewController {
         let titleAttr = [NSAttributedStringKey.font: titleLabel.font!]
         let titleSize = CGSize(width: contentWidth, height: 90)
         let titleRect = titleString.boundingRect(with: titleSize, options: .usesLineFragmentOrigin, attributes: titleAttr, context: nil)
-        yPos += padding
         titleLabel.frame = CGRect(x: padding, y: yPos, width: alertWidth - (padding * 2), height: ceil(titleRect.height))
         yPos += ceil(titleRect.height)
-        
         
         // position text
         if self.textView != nil {
@@ -221,11 +220,11 @@ open class JSSAlertView: UIViewController {
                 cancelButtonLabel.font = buttonConfig.cancelFont
                 cancelButtonLabel.textColor = buttonConfig.textColor
             }
+            buttonsBackgroundView.frame = CGRect(x: 0, y: yPos - 1, width: alertWidth, height: buttonHeight + 1)
             yPos += buttonHeight
         }else{
             yPos += padding
         }
-        
         
         // size the background view
         alertBackgroundView.frame = CGRect(x: 0, y: 0, width: alertWidth, height: yPos)
@@ -297,6 +296,7 @@ open class JSSAlertView: UIViewController {
         self.iconImage = iconImage
         if iconImage != nil {
             iconImageView = UIImageView(image: iconImage)
+            iconImageView.contentMode = UIViewContentMode.scaleAspectFit
             containerView.addSubview(iconImageView)
         }
         
@@ -335,10 +335,14 @@ open class JSSAlertView: UIViewController {
         
         // Button
         self.noButtons = true
+        let buttonColor = UIImage.with(color: adjustBrightness(UIColor.white, amount: 1.0))
         if !noButtons {
+            buttonsBackgroundView = UIView()
+            buttonsBackgroundView.backgroundColor = UIColorFromHex(0xe7e2de, alpha: 0.7)
+            alertBackgroundView!.addSubview(buttonsBackgroundView)
+
             self.noButtons = false
             dismissButton = UIButton()
-            let buttonColor = UIImage.with(color: adjustBrightness(baseColor, amount: 0.8))
             let buttonHighlightColor = UIImage.with(color: adjustBrightness(baseColor, amount: 0.9))
             dismissButton.setBackgroundImage(buttonColor, for: .normal)
             dismissButton.setBackgroundImage(buttonHighlightColor, for: .highlighted)
@@ -359,7 +363,6 @@ open class JSSAlertView: UIViewController {
             // Second cancel button
             if cancelButtonText != nil {
                 cancelButton = UIButton()
-                let buttonColor = UIImage.with(color: adjustBrightness(baseColor, amount: 0.8))
                 let buttonHighlightColor = UIImage.with(color: adjustBrightness(baseColor, amount: 0.9))
                 cancelButton.setBackgroundImage(buttonColor, for: .normal)
                 cancelButton.setBackgroundImage(buttonHighlightColor, for: .highlighted)
