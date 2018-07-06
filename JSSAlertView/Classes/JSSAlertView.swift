@@ -70,7 +70,9 @@ open class JSSAlertView: UIViewController {
     var textView: UITextView!
     weak var rootViewController: UIViewController!
     var iconImage: UIImage!
+    var titleImage: UIImage!
     var iconImageView: UIImageView!
+    var titleImageView: UIImageView!
     var closeAction: (()->Void)!
     var cancelAction: (()->Void)!
     var isAlertOpen: Bool = false
@@ -94,7 +96,9 @@ open class JSSAlertView: UIViewController {
     let baseHeight: CGFloat = 226.0
     var alertWidth: CGFloat = 294.0
     let buttonHeight: CGFloat = 44.0
-    let padding: CGFloat = 20.0
+    var padding: CGFloat = 20.0
+    var titleAndMessagePadding: CGFloat = 0
+    let maxTextHeight: CGFloat = 274.0
     
     var viewWidth: CGFloat?
     var viewHeight: CGFloat?
@@ -147,15 +151,22 @@ open class JSSAlertView: UIViewController {
         
     }
 
+    public func setPaddingAndSize(padding: CGFloat, titleAndMessagePadding: CGFloat = 0, alertWidth: CGFloat) {
+        self.alertWidth = alertWidth
+        self.padding = padding
+        self.titleAndMessagePadding = titleAndMessagePadding
+    }
+
     open override func viewDidLayoutSubviews() {
         super.viewWillLayoutSubviews()
         let size = self.rootViewControllerSize()
         self.viewWidth = size.width
         self.viewHeight = size.height
-        
+
         var yPos: CGFloat = 24.0
+        var xPos: CGFloat = padding
         let contentWidth:CGFloat = self.alertWidth - (self.padding*2)
-        
+
         // position the icon image view, if there is one
         if self.iconImageView != nil {
             yPos += iconImageView.frame.height
@@ -163,15 +174,19 @@ open class JSSAlertView: UIViewController {
             iconImageView.frame = CGRect(x: centerX, y: 24, width: 64, height: 64)
             yPos += 16
         }
-        
+
         // position the title
         let titleString = titleLabel.text! as NSString
         let titleAttr = [NSAttributedStringKey.font: titleLabel.font!]
         let titleSize = CGSize(width: contentWidth, height: 90)
         let titleRect = titleString.boundingRect(with: titleSize, options: .usesLineFragmentOrigin, attributes: titleAttr, context: nil)
-        titleLabel.frame = CGRect(x: padding, y: yPos, width: alertWidth - (padding * 2), height: ceil(titleRect.height))
-        yPos += ceil(titleRect.height)
-        
+        if self.titleImageView != nil {
+            titleImageView.frame = CGRect(x: padding + 4, y: yPos + 4, width: 27, height: 27)
+            xPos += 16 + 27
+        }
+        titleLabel.frame = CGRect(x: xPos, y: yPos, width: alertWidth - (padding * 2), height: ceil(titleRect.height))
+        yPos += ceil(titleRect.height) //+ titleAndMessagePadding
+
         // position text
         if self.textView != nil {
             let textString = textView.text! as NSString
@@ -179,10 +194,16 @@ open class JSSAlertView: UIViewController {
             let realSize = textView.sizeThatFits(CGSize(width: contentWidth, height: CGFloat.greatestFiniteMagnitude))
             let textSize = CGSize(width: contentWidth, height: CGFloat(fmaxf(Float(90.0), Float(realSize.height))))
             let textRect = textString.boundingRect(with: textSize, options: .usesLineFragmentOrigin, attributes: textAttr, context: nil)
-            textView.frame = CGRect(x: padding, y: yPos, width: alertWidth - (padding * 2), height: ceil(textRect.height) * 2)
-            yPos += ceil(textRect.height) + padding / 2
+            var textHeight = ceil(textRect.height)
+            if textHeight > maxTextHeight {
+                textHeight = maxTextHeight
+                textView.isScrollEnabled = true
+                textView.isUserInteractionEnabled = true
+            }
+            textView.frame = CGRect(x: padding, y: yPos, width: alertWidth - (padding * 2), height: textHeight + padding / 2)
+            yPos += textHeight + padding / 2
         }
-        
+
         // position timer
         if self.timerLabel != nil {
             let timerString = timerLabel.text! as NSString
@@ -191,9 +212,9 @@ open class JSSAlertView: UIViewController {
             self.timerLabel.frame = CGRect(x: self.padding, y: yPos, width: self.alertWidth - (self.padding*2), height: ceil(timerRect.size.height))
             yPos += ceil(timerRect.size.height)
         }
-        
+
         // position the buttons
-        
+
         if !noButtons {
             yPos += padding
             var buttonWidth = alertWidth
@@ -204,13 +225,13 @@ open class JSSAlertView: UIViewController {
                     cancelButtonLabel.frame = CGRect(x: padding, y: (buttonHeight / 2) - 15, width: buttonWidth - (padding * 2), height: 30)
                 }
             }
-            
+
             let buttonX = buttonWidth == alertWidth ? 0 : buttonWidth
             dismissButton.frame = CGRect(x: buttonX, y: yPos, width: buttonWidth, height: buttonHeight)
             if buttonLabel != nil {
                 buttonLabel.frame = CGRect(x: padding, y: (buttonHeight / 2) - 15, width: buttonWidth - (padding * 2), height: 30)
             }
-            
+
             // set button fonts
             if buttonLabel != nil {
                 buttonLabel.font = buttonConfig.font
@@ -225,10 +246,10 @@ open class JSSAlertView: UIViewController {
         }else{
             yPos += padding
         }
-        
+
         // size the background view
         alertBackgroundView.frame = CGRect(x: 0, y: 0, width: alertWidth, height: yPos)
-        
+
         // size the container that holds everything together
         containerView.frame = CGRect(x: (viewWidth! - alertWidth) / 2, y: (viewHeight! - yPos)/2, width: alertWidth, height: yPos)
     }
@@ -261,12 +282,14 @@ open class JSSAlertView: UIViewController {
                      cancelButtonText: String? = nil,
                      viewConfig: JSSViewConfgiuration? = nil,
                      iconImage: UIImage? = nil,
+                     titleImage: UIImage? = nil,
                      delay: Double? = nil,
-                     timeLeft: UInt? = nil) -> JSSAlertViewResponder {
-        
+                     timeLeft: UInt? = nil,
+                     textAlignment: NSTextAlignment = .center) -> JSSAlertViewResponder {
+
         rootViewController = viewController
         view.backgroundColor = UIColorFromHex(0x000000, alpha: 0.7)
-        
+
         var baseColor: UIColor = defaultColor
         var cornerRadius: CGFloat = defaultCornerRadius
 
@@ -275,13 +298,13 @@ open class JSSAlertView: UIViewController {
             cornerRadius = config.cornerRadius
         }
         let textColor = darkTextColor
-        
+
         let sz = screenSize()
         viewWidth = sz.width
         viewHeight = sz.height
-        
+
         view.frame.size = sz
-        
+
         // Container for the entire alert modal contents
         containerView = UIView()
         view.addSubview(containerView!)
@@ -291,7 +314,7 @@ open class JSSAlertView: UIViewController {
         alertBackgroundView.layer.cornerRadius = cornerRadius
         alertBackgroundView.layer.masksToBounds = true
         containerView.addSubview(alertBackgroundView!)
-        
+
         // Icon
         self.iconImage = iconImage
         if iconImage != nil {
@@ -299,29 +322,36 @@ open class JSSAlertView: UIViewController {
             iconImageView.contentMode = UIViewContentMode.scaleAspectFit
             containerView.addSubview(iconImageView)
         }
-        
+        // TitleIcon
+        self.titleImage = titleImage
+        if titleImage != nil {
+            titleImageView = UIImageView(image: titleImage)
+            titleImageView.contentMode = UIViewContentMode.scaleAspectFit
+            containerView.addSubview(titleImageView)
+        }
+
         // Title
         titleLabel = UILabel()
         titleLabel.textColor = textConfig.titleColor
         titleLabel.numberOfLines = 0
-        titleLabel.textAlignment = .center
+        titleLabel.textAlignment = textAlignment
         titleLabel.font = textConfig.titleFont
         titleLabel.text = title
         containerView.addSubview(titleLabel)
-        
+
         // View text
         if let text = text {
             textView = UITextView()
             textView.isUserInteractionEnabled = false
             textView.isEditable = false
             textView.textColor = textConfig.textColor
-            textView.textAlignment = .center
+            textView.textAlignment = textAlignment
             textView.font = textConfig.textFont
             textView.backgroundColor = UIColor.clear
             textView.text = text
             containerView.addSubview(textView)
         }
-        
+
         //timer
         if let time = timeLeft {
             self.timerLabel = UILabel()
@@ -332,7 +362,7 @@ open class JSSAlertView: UIViewController {
             self.containerView.addSubview(timerLabel)
             configureTimer()
         }
-        
+
         // Button
         self.noButtons = true
         let buttonColor = UIImage.with(color: adjustBrightness(UIColor.white, amount: 1.0))
@@ -359,7 +389,7 @@ open class JSSAlertView: UIViewController {
                 buttonLabel.text = "OK"
             }
             dismissButton.addSubview(buttonLabel)
-            
+
             // Second cancel button
             if cancelButtonText != nil {
                 cancelButton = UIButton()
@@ -379,21 +409,21 @@ open class JSSAlertView: UIViewController {
                 cancelButton.addSubview(cancelButtonLabel)
             }
         }
-        
+
         // Animate it in
         view.alpha = 0
         definesPresentationContext = true
         modalPresentationStyle = .overFullScreen
-        
+
         if let config = animationConfig {
             showAlertWithAnimation(source: viewController, config: config)
         } else {
             showAlertWithAnimation(source: viewController, delay: delay)
         }
-        
-        
+
+
         return JSSAlertViewResponder(alertview: self)
-        
+
     }
     
     fileprivate func showAlertWithAnimation(source viewController: UIViewController,
@@ -557,37 +587,37 @@ extension JSSAlertView {
     /// - Parameters:
     ///   - fontStr: name of font
     ///   - type: target to set font to e.g. title, text ...
-    func setFont(_ fontStr: String, type: FontType) {
+    func setFont(_ fontStr: String, type: FontType, size: CGFloat? = nil) {
         switch type {
         case .title:
             textConfig.titleFontName = fontStr
-            if let font = UIFont(name: textConfig.titleFontName, size: 24) {
+            if let font = UIFont(name: textConfig.titleFontName, size: size ?? 24) {
                 self.titleLabel.font = font
             } else {
-                self.titleLabel.font = UIFont.systemFont(ofSize: 24)
+                self.titleLabel.font = UIFont.systemFont(ofSize: size ?? 24)
             }
         case .text:
             if self.textView != nil {
                 textConfig.textFontName = fontStr
-                if let font = UIFont(name: textConfig.textFontName, size: 16) {
+                if let font = UIFont(name: textConfig.textFontName, size: size ?? 16) {
                     self.textView.font = font
                 } else {
-                    self.textView.font = UIFont.systemFont(ofSize: 16)
+                    self.textView.font = UIFont.systemFont(ofSize: size ?? 16)
                 }
             }
         case .button:
             buttonConfig.buttonFontName = fontStr
-            if let font = UIFont(name: buttonConfig.buttonFontName, size: 24) {
+            if let font = UIFont(name: buttonConfig.buttonFontName, size: size ?? 24) {
                 self.buttonLabel.font = font
             } else {
-                self.buttonLabel.font = UIFont.systemFont(ofSize: 24)
+                self.buttonLabel.font = UIFont.systemFont(ofSize: size ?? 24)
             }
         case .timer:
             textConfig.timerFont = fontStr
-            if let font = UIFont(name: textConfig.timerFont, size: 27) {
+            if let font = UIFont(name: textConfig.timerFont, size: size ?? 27) {
                 self.buttonLabel.font = font
             } else {
-                self.buttonLabel.font = UIFont.systemFont(ofSize: 27)
+                self.buttonLabel.font = UIFont.systemFont(ofSize: size ?? 27)
             }
         }
         // relayout to account for size changes
