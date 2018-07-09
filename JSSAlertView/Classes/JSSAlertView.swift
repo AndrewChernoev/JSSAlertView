@@ -185,7 +185,7 @@ open class JSSAlertView: UIViewController {
             xPos += 16 + 27
         }
         titleLabel.frame = CGRect(x: xPos, y: yPos, width: alertWidth - (padding * 2), height: ceil(titleRect.height))
-        yPos += ceil(titleRect.height) //+ titleAndMessagePadding
+        yPos += ceil(titleRect.height) + titleAndMessagePadding
 
         // position text
         if self.textView != nil {
