@@ -102,6 +102,7 @@ open class JSSAlertView: UIViewController {
     
     var viewWidth: CGFloat?
     var viewHeight: CGFloat?
+    var textMinimumLineHeight: CGFloat?
     
     var viewConfig: JSSViewConfgiuration = JSSViewConfgiuration(color: UIColor.clear,
                                                                 radius: 0.0)
@@ -157,6 +158,11 @@ open class JSSAlertView: UIViewController {
         self.titleAndMessagePadding = titleAndMessagePadding
     }
 
+    public func setTextPadding(_ value: CGFloat) {
+        textMinimumLineHeight = value
+        textView.setLineSpacing(minimumLineHeight: value)
+    }
+
     open override func viewDidLayoutSubviews() {
         super.viewWillLayoutSubviews()
         let size = self.rootViewControllerSize()
@@ -190,7 +196,13 @@ open class JSSAlertView: UIViewController {
         // position text
         if self.textView != nil {
             let textString = textView.text! as NSString
-            let textAttr = [NSAttributedStringKey.font: textView.font!]
+            var textAttr: [NSAttributedStringKey: NSObject] = [NSAttributedStringKey.font: textView.font!]
+            if let height = textMinimumLineHeight {
+                let paragraphStyle = NSMutableParagraphStyle()
+                paragraphStyle.minimumLineHeight = height
+                textAttr = [NSAttributedStringKey.font: textView.font!,
+                            NSAttributedStringKey.paragraphStyle: paragraphStyle]
+            }
             let realSize = textView.sizeThatFits(CGSize(width: contentWidth, height: CGFloat.greatestFiniteMagnitude))
             let textSize = CGSize(width: contentWidth, height: CGFloat(fmaxf(Float(90.0), Float(realSize.height))))
             let textRect = textString.boundingRect(with: textSize, options: .usesLineFragmentOrigin, attributes: textAttr, context: nil)
@@ -635,5 +647,28 @@ extension JSSAlertView {
         case .dark:
             recolorText(darkTextColor)
         }
+    }
+}
+
+extension UITextView {
+
+    func setLineSpacing(minimumLineHeight: CGFloat = 0.0) {
+
+        guard let labelText = self.text else { return }
+
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.minimumLineHeight = minimumLineHeight
+
+        let attributedString:NSMutableAttributedString
+        if let labelattributedText = self.attributedText {
+            attributedString = NSMutableAttributedString(attributedString: labelattributedText)
+        } else {
+            attributedString = NSMutableAttributedString(string: labelText)
+        }
+
+        // Line spacing attribute
+        attributedString.addAttribute(NSAttributedStringKey.paragraphStyle, value:paragraphStyle, range:NSMakeRange(0, attributedString.length))
+
+        self.attributedText = attributedString
     }
 }
