@@ -362,10 +362,10 @@ open class JSSAlertView: UIViewController {
             textView.textAlignment = textAlignment
             textView.font = textConfig.textFont
             textView.backgroundColor = UIColor.clear
+            textView.text = text
             if let lineHeight = textMinimumLineHeight {
                 textView.setLineSpacing(minimumLineHeight: lineHeight)
             }
-            textView.text = text
             containerView.addSubview(textView)
         }
 
