@@ -160,7 +160,9 @@ open class JSSAlertView: UIViewController {
 
     public func setTextPadding(_ value: CGFloat) {
         textMinimumLineHeight = value
-        textView.setLineSpacing(minimumLineHeight: value)
+        if textView != nil {
+            textView.setLineSpacing(minimumLineHeight: value)
+        }
     }
 
     open override func viewDidLayoutSubviews() {
@@ -360,6 +362,9 @@ open class JSSAlertView: UIViewController {
             textView.textAlignment = textAlignment
             textView.font = textConfig.textFont
             textView.backgroundColor = UIColor.clear
+            if let lineHeight = textMinimumLineHeight {
+                textView.setLineSpacing(minimumLineHeight: lineHeight)
+            }
             textView.text = text
             containerView.addSubview(textView)
         }
