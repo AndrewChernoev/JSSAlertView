@@ -197,25 +197,15 @@ open class JSSAlertView: UIViewController {
 
         // position text
         if self.textView != nil {
-            let textString = textView.text! as NSString
-            var textAttr: [NSAttributedStringKey: NSObject] = [NSAttributedStringKey.font: textView.font!]
-            if let height = textMinimumLineHeight {
-                let paragraphStyle = NSMutableParagraphStyle()
-                paragraphStyle.minimumLineHeight = height
-                textAttr = [NSAttributedStringKey.font: textView.font!,
-                            NSAttributedStringKey.paragraphStyle: paragraphStyle]
-            }
             let realSize = textView.sizeThatFits(CGSize(width: contentWidth, height: CGFloat.greatestFiniteMagnitude))
-            let textSize = CGSize(width: contentWidth, height: CGFloat(fmaxf(Float(90.0), Float(realSize.height))))
-            let textRect = textString.boundingRect(with: textSize, options: .usesLineFragmentOrigin, attributes: textAttr, context: nil)
-            var textHeight = ceil(textRect.height)
+            var textHeight = realSize.height
             if textHeight > maxTextHeight {
                 textHeight = maxTextHeight
                 textView.isScrollEnabled = true
                 textView.isUserInteractionEnabled = true
             }
-            textView.frame = CGRect(x: padding, y: yPos, width: alertWidth - (padding * 2), height: textHeight + padding / 2)
-            yPos += textHeight + padding / 2
+            textView.frame = CGRect(x: padding, y: yPos, width: alertWidth - (padding * 2), height: textHeight)
+            yPos += textHeight
         }
 
         // position timer
