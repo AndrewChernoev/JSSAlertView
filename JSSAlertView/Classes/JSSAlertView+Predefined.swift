@@ -32,18 +32,18 @@ extension JSSAlertView {
 	               delay: Double? = nil,
 	               timeLeft: UInt? = nil) -> JSSAlertViewResponder {
 
-
-		let alertview = show(viewController,
-		                     title: title,
-		                     text: text,
-		                     noButtons: noButtons,
-		                     buttonText: buttonText,
-		                     cancelButtonText: cancelButtonText,
-		                     color: UIColorFromHex(0x3498db, alpha: 1),
-		                     iconImage: iconImage,
-		                     delay: delay,
-		                     timeLeft: timeLeft)
-
+            let config = JSSViewConfgiuration(color: UIColorFromHex(0x3498db, alpha: 1),
+                                              radius: defaultCornerRadius)
+            let alertview = show(viewController,
+                                 title: title,
+                                 text: text,
+                                 noButtons: noButtons,
+                                 buttonText: buttonText,
+                                 cancelButtonText: cancelButtonText,
+                                 viewConfig: config,
+                                 iconImage: iconImage,
+                                 delay: delay,
+                                 timeLeft: timeLeft)
 
 		alertview.setTextTheme(.light)
 		return alertview
@@ -69,13 +69,15 @@ extension JSSAlertView {
 	                  delay: Double?=nil,
 	                  timeLeft: UInt? = nil) -> JSSAlertViewResponder {
 
+        let config = JSSViewConfgiuration(color: UIColorFromHex(0x2ecc71, alpha: 1),
+                                          radius: defaultCornerRadius)
 		return show(viewController,
 		            title: title,
 		            text: text,
 		            noButtons: noButtons,
 		            buttonText: buttonText,
 		            cancelButtonText: cancelButtonText,
-		            color: UIColorFromHex(0x2ecc71, alpha: 1),
+		            viewConfig: config,
 		            iconImage: iconImage,
 		            delay: delay,
 		            timeLeft: timeLeft)
@@ -101,14 +103,16 @@ extension JSSAlertView {
 	                  cancelButtonText: String? = nil,
 	                  delay: Double?=nil,
 	                  timeLeft: UInt? = nil) -> JSSAlertViewResponder {
-
+        
+        let config = JSSViewConfgiuration(color: UIColorFromHex(0xf1c40f, alpha: 1),
+                                          radius: defaultCornerRadius)
 		return show(viewController,
 		            title: title,
 		            text: text,
 		            noButtons: noButtons,
 		            buttonText: buttonText,
 		            cancelButtonText: cancelButtonText,
-		            color: UIColorFromHex(0xf1c40f, alpha: 1),
+		            viewConfig: config,
 		            iconImage: iconImage,
 		            delay: delay,
 		            timeLeft: timeLeft)
@@ -135,14 +139,15 @@ extension JSSAlertView {
 	                 delay: Double?=nil,
 	                 timeLeft: UInt? = nil) -> JSSAlertViewResponder {
 
-
+        let config = JSSViewConfgiuration(color: UIColorFromHex(0xe74c3c, alpha: 1),
+                                          radius: defaultCornerRadius)
 		let alertview = show(viewController,
 		                     title: title,
 		                     text: text,
 		                     noButtons: noButtons,
 		                     buttonText: buttonText,
 		                     cancelButtonText: cancelButtonText,
-		                     color: UIColorFromHex(0xe74c3c, alpha: 1),
+                             viewConfig: config,
 		                     iconImage: iconImage,
 		                     delay: delay,
 		                     timeLeft: timeLeft)
