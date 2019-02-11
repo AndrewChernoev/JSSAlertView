@@ -45,10 +45,20 @@ public struct JSSTextConfgiuration {
 
 public struct JSSButtonConfgiuration {
     var buttonFontName: String = "SFUIText-Semibold"
-    var textColor: UIColor = UIColorFromHex(0xf18732, alpha: 1)
-    var size: Int = 17
-    var font: UIFont? = UIFont.systemFont(ofSize: 17, weight: .regular)
-    var cancelFont: UIFont? = UIFont.systemFont(ofSize: 17, weight: .semibold)
+    var textColor: UIColor
+    var size: Int
+    var font: UIFont?
+    var cancelFont: UIFont?
+    
+    public init(color: UIColor = UIColor.black,
+                size: Int = 17,
+                font: UIFont? = UIFont.systemFont(ofSize: 17, weight: .regular),
+                cancelFont: UIFont? = UIFont.systemFont(ofSize: 17, weight: .semibold) ) {
+        self.textColor = color
+        self.size = size
+        self.font = font
+        self.cancelFont = cancelFont
+    }
 }
 
 public struct JSSAnimationConfiguration {
