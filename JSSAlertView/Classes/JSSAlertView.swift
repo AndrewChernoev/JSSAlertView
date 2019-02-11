@@ -284,6 +284,7 @@ open class JSSAlertView: UIViewController {
                      noButtons: Bool = false,
                      buttonText: String? = nil,
                      cancelButtonText: String? = nil,
+                     buttonsConfig: JSSButtonConfgiuration? = nil,
                      viewConfig: JSSViewConfgiuration? = nil,
                      iconImage: UIImage? = nil,
                      titleImage: UIImage? = nil,
@@ -301,6 +302,11 @@ open class JSSAlertView: UIViewController {
             baseColor = config.color
             cornerRadius = config.cornerRadius
         }
+        
+        if let btnConfig = buttonsConfig {
+            self.buttonConfig = btnConfig
+        }
+        
         let textColor = darkTextColor
 
         let sz = screenSize()
